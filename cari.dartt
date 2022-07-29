@@ -1,0 +1,108 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'main.dart';
+import 'hareketekle.dart';
+
+//import 'package:databasaran/main.dart';
+
+class Cari extends StatefulWidget {
+  const Cari({Key? key}) : super(key: key);
+
+  @override
+  State<Cari> createState() => _CariState();
+}
+
+class _CariState extends State<Cari> {
+  TextEditingController cariAddCtrl = TextEditingController();
+  TextEditingController carigrubu = TextEditingController();
+  TextEditingController cariname = TextEditingController();
+  TextEditingController paraBirimi = TextEditingController();
+  ////veri ekleme
+  addCari() {
+    Map<String, dynamic> data = {
+      'carigrup': carigrubu.value,
+      "cariname": cariname.value,
+      "amount": 0,
+      "currency": paraBirimi.value,
+    };
+
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('cariler');
+    collectionReference.add(data);//.then((value) => dataAddSuccess(context)).catchError((error)=>dataAddError(context));
+  }
+
+//////_createRows FONKSİYONU/////////////////
+  List<DataRow> _createRows(QuerySnapshot snapshot, context) {
+    List<DataRow> newList =
+        snapshot.docs.map((DocumentSnapshot documentSnapshot) {
+      return new DataRow(cells: [/*
+        DataCell(Text(documentSnapshot.data()['carigrup'].toString())),
+        DataCell(Text(documentSnapshot.data()['cariname'].toString())),
+        DataCell(Text(documentSnapshot.data()['amount'].toString())),
+        DataCell(Text(documentSnapshot.data()['currency'].toString())),
+        DataCell(IconButton(
+          onPressed: () {},
+          icon: Icon(
+            Icons.edit,
+            color: Colors.blue,
+          ),
+        )),
+        DataCell(IconButton(
+          icon: Icon(
+            Icons.delete,
+            color: Colors.red,
+          ),
+        ))
+      */]);
+    }).toList();
+
+    return newList;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+//BODY KISMI
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('cariler').snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData) {
+              return Container(/*
+                  margin: EdgeInsets.only(
+                      left: displayWidth(context) * 0.5,
+                      top: displayHeight(context) * 0.5),
+                  child: CircularProgressIndicator()*/);
+            }
+            return new DataTable(
+              columns: <DataColumn>[
+                new DataColumn(
+                  label: Text('Cari Grup'),
+                ),
+                new DataColumn(
+                  label: Text('Cari Adı'),
+                ),
+                new DataColumn(
+                  label: Text('Bakiye'),
+                ),
+                new DataColumn(
+                  label: Text('Cari Para Birimi'),
+                ),
+                new DataColumn(
+                  label: Text('Düzenle'),
+                ),
+                new DataColumn(
+                  label: Text('Sil'),
+                ),
+              ],
+              rows: _createRows(snapshot, context), //(snapshot.data,context), 
+              
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
